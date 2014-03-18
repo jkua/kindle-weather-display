@@ -1,22 +1,26 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 # Kindle Weather Display
-# Matthew Petroff (http://www.mpetroff.net/)
-# September 2012
+# Originally by Matthew Petroff (http://www.mpetroff.net/)
+# Modified by John Kua (http://john.kua.fm)
+# March 2014
 
 import urllib2
 from xml.dom import minidom
 import datetime
 import codecs
+import sys
 
-
+# Get location from command line
+latitude = sys.argv[1]
+longitude = sys.argv[2]
 
 #
 # Download and parse weather data
 #
 
 # Fetch data (change lat and lon to desired location)
-weather_xml = urllib2.urlopen('http://graphical.weather.gov/xml/SOAP_server/ndfdSOAPclientByDay.php?whichClient=NDFDgenByDay&lat=39.3286&lon=-76.6169&format=24+hourly&numDays=4&Unit=e').read()
+weather_xml = urllib2.urlopen('http://graphical.weather.gov/xml/SOAP_server/ndfdSOAPclientByDay.php?whichClient=NDFDgenByDay&lat=' + latitude + '&lon=' + longitude + '&format=24+hourly&numDays=4&Unit=e').read()
 dom = minidom.parseString(weather_xml)
 
 # Parse temperatures
@@ -33,6 +37,7 @@ for item in xml_temperatures:
         for i in range(len(values)):
             lows[i] = int(values[i].firstChild.nodeValue)
 
+	
 # Parse icons
 xml_icons = dom.getElementsByTagName('icon-link')
 icons = [None]*4
@@ -60,7 +65,15 @@ output = output.replace('LOW_ONE',str(lows[0])).replace('LOW_TWO',str(lows[1])).
 # Insert days of week
 one_day = datetime.timedelta(days=1)
 days_of_week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+now = datetime.datetime.now()
+if day_one.day > now.day:
+	output = output.replace('DAY_ONE','Tomorrow').replace('DAY_TWO',days_of_week[(day_one + one_day).weekday()])
+else:
+	output = output.replace('DAY_ONE','Today').replace('DAY_TWO','Tomorrow')
 output = output.replace('DAY_THREE',days_of_week[(day_one + 2*one_day).weekday()]).replace('DAY_FOUR',days_of_week[(day_one + 3*one_day).weekday()])
+
+# Insert processing time
+output = output.replace('DATE_STRING',now.strftime('%H:%M %B %d, %Y'))
 
 # Write output
 codecs.open('weather-script-output.svg', 'w', encoding='utf-8').write(output)
