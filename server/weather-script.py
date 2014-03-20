@@ -12,41 +12,111 @@ import codecs
 import sys
 
 # Get location from command line
-latitude = sys.argv[1]
-longitude = sys.argv[2]
+if len(sys.argv) >= 3:
+	latitude = sys.argv[1]
+	longitude = sys.argv[2]
+	if len(sys.argv) >= 4:
+		wundergroundApiKey = sys.argv[3]
+else:
+	latitude = 37
+	longitude = -122
 
 #
 # Download and parse weather data
 #
 
-# Fetch data (change lat and lon to desired location)
-weather_xml = urllib2.urlopen('http://graphical.weather.gov/xml/SOAP_server/ndfdSOAPclientByDay.php?whichClient=NDFDgenByDay&lat=' + latitude + '&lon=' + longitude + '&format=24+hourly&numDays=4&Unit=e').read()
-dom = minidom.parseString(weather_xml)
+useWunderground = True
 
-# Parse temperatures
-xml_temperatures = dom.getElementsByTagName('temperature')
-highs = [None]*4
-lows = [None]*4
-for item in xml_temperatures:
-    if item.getAttribute('type') == 'maximum':
-        values = item.getElementsByTagName('value')
-        for i in range(len(values)):
-            highs[i] = int(values[i].firstChild.nodeValue)
-    if item.getAttribute('type') == 'minimum':
-        values = item.getElementsByTagName('value')
-        for i in range(len(values)):
-            lows[i] = int(values[i].firstChild.nodeValue)
+if useWunderground == True:
+	iconDict = dict()
+	iconDict['chanceflurries']='sn' #bad
+	iconDict['chancerain']='hi_shwrs'
+	iconDict['chancesleet']='ip' #bad
+	iconDict['chancesnow']='sn' #bad
+	iconDict['chancetstorms']='scttsra'
+	iconDict['clear']='skc'
+	iconDict['cloudy']='ovc'
+	iconDict['flurries']='sn' # not a good match
+	iconDict['fog']='fg'
+	iconDict['haze']='du' #eh
+	iconDict['mostlycloudy']='bkn'
+	iconDict['partlysunny']='bkn'
+	iconDict['mostlysunny']='sct'
+	iconDict['partlycloudy']='sct'
+	iconDict['rain']='ra'
+	iconDict['sleet']='ip'
+	iconDict['snow']='sn'
+	iconDict['tstorms']='tsra'
+	iconDict['unknown']='skc' #bad
+
+
+	weatherXml = urllib2.urlopen('http://api.wunderground.com/api/' + wundergroundApiKey + '/astronomy/conditions/forecast10day/hourly10day/tide/yesterday/q/' + str(latitude) + ',' + str(longitude) + '.xml').read()
+	dom = minidom.parseString(weatherXml)
+	simpleForecastXml = dom.getElementsByTagName('simpleforecast')
+	forecastDayXml = simpleForecastXml[0].getElementsByTagName('forecastday')
+	highs = []
+	lows = []
+	icons = []
+	for forecastDay in forecastDayXml:
+		tempsXml = forecastDay.getElementsByTagName('fahrenheit')
+		highs.append(tempsXml[0].firstChild.nodeValue)
+		lows.append(tempsXml[1].firstChild.nodeValue)
+		iconXml = forecastDay.getElementsByTagName('icon')
+		icons.append(iconDict[iconXml[0].firstChild.nodeValue])
+	day = int(forecastDayXml[0].getElementsByTagName('day')[0].firstChild.nodeValue)
+	month = int(forecastDayXml[0].getElementsByTagName('month')[0].firstChild.nodeValue)
+	year = int(forecastDayXml[0].getElementsByTagName('year')[0].firstChild.nodeValue)
+	day_one = datetime.date(year, month, day)
+
+	currentObservationXml = dom.getElementsByTagName('current_observation')
+	currentTemperatureXml = currentObservationXml[0].getElementsByTagName('temp_f')
+	currentTemperature = str(int(round(float(currentTemperatureXml[0].firstChild.nodeValue))))
+	windSpeedXml = currentObservationXml[0].getElementsByTagName('wind_mph')
+	windSpeed = windSpeedXml[0].firstChild.nodeValue
+	windDirectionXml = currentObservationXml[0].getElementsByTagName('wind_dir')
+	windDirection = windDirectionXml[0].firstChild.nodeValue
+
+	moonPhaseXml = dom.getElementsByTagName('moon_phase')[0]
+	moonPercentIlluminated = moonPhaseXml.getElementsByTagName('percentIlluminated')[0].firstChild.nodeValue
+	moonAge = moonPhaseXml.getElementsByTagName('ageOfMoon')[0].firstChild.nodeValue
+	sunriseXml = moonPhaseXml.getElementsByTagName('sunrise')[0]
+	sunriseHour = sunriseXml.getElementsByTagName('hour')[0].firstChild.nodeValue
+	sunriseMinute = sunriseXml.getElementsByTagName('minute')[0].firstChild.nodeValue
+	sunsetXml = moonPhaseXml.getElementsByTagName('sunset')[0]
+	sunsetHour = sunsetXml.getElementsByTagName('hour')[0].firstChild.nodeValue
+	sunsetMinute = sunsetXml.getElementsByTagName('minute')[0].firstChild.nodeValue
+	sunrise = datetime.time(int(sunriseHour),int(sunriseMinute))
+	sunset = datetime.time(int(sunsetHour),int(sunsetMinute))
+
+else:
+	# Fetch data (change lat and lon to desired location)
+	weather_xml = urllib2.urlopen('http://graphical.weather.gov/xml/SOAP_server/ndfdSOAPclientByDay.php?whichClient=NDFDgenByDay&lat=' + latitude + '&lon=' + longitude + '&format=24+hourly&numDays=4&Unit=e').read()
+	dom = minidom.parseString(weather_xml)
+
+	# Parse temperatures
+	xml_temperatures = dom.getElementsByTagName('temperature')
+	highs = [None]*4
+	lows = [None]*4
+	for item in xml_temperatures:
+		if item.getAttribute('type') == 'maximum':
+			values = item.getElementsByTagName('value')
+			for i in range(len(values)):
+				highs[i] = int(values[i].firstChild.nodeValue)
+		if item.getAttribute('type') == 'minimum':
+			values = item.getElementsByTagName('value')
+			for i in range(len(values)):
+				lows[i] = int(values[i].firstChild.nodeValue)
 
 	
-# Parse icons
-xml_icons = dom.getElementsByTagName('icon-link')
-icons = [None]*4
-for i in range(len(xml_icons)):
-    icons[i] = xml_icons[i].firstChild.nodeValue.split('/')[-1].split('.')[0].rstrip('0123456789')
+	# Parse icons
+	xml_icons = dom.getElementsByTagName('icon-link')
+	icons = [None]*4
+	for i in range(len(xml_icons)):
+		icons[i] = xml_icons[i].firstChild.nodeValue.split('/')[-1].split('.')[0].rstrip('0123456789')
 
-# Parse dates
-xml_day_one = dom.getElementsByTagName('start-valid-time')[0].firstChild.nodeValue[0:10]
-day_one = datetime.datetime.strptime(xml_day_one, '%Y-%m-%d')
+	# Parse dates
+	xml_day_one = dom.getElementsByTagName('start-valid-time')[0].firstChild.nodeValue[0:10]
+	day_one = datetime.datetime.strptime(xml_day_one, '%Y-%m-%d')
 
 
 
@@ -55,7 +125,13 @@ day_one = datetime.datetime.strptime(xml_day_one, '%Y-%m-%d')
 #
 
 # Open SVG to process
-output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
+if useWunderground == True:
+	output = codecs.open('weather-script-wunderground-preprocess.svg', 'r', encoding='utf-8').read()
+	output = output.replace('TEMP_NOW',currentTemperature)
+	output = output.replace('SUNRISE',sunriseHour + ':' + sunrise.strftime('%M'))
+	output = output.replace('SUNSET',str(sunset.hour-12) + ':' + sunset.strftime('%M'))
+else:
+	output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
 
 # Insert icons and temperatures
 output = output.replace('ICON_ONE',icons[0]).replace('ICON_TWO',icons[1]).replace('ICON_THREE',icons[2]).replace('ICON_FOUR',icons[3])
