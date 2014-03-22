@@ -130,6 +130,10 @@ if useWunderground == True:
 	output = output.replace('TEMP_NOW',currentTemperature)
 	output = output.replace('SUNRISE',sunriseHour + ':' + sunrise.strftime('%M'))
 	output = output.replace('SUNSET',str(sunset.hour-12) + ':' + sunset.strftime('%M'))
+	output = output.replace('MOON_ILLUMINATION',moonPercentIlluminated)
+	output = output.replace('MOON_AGE',moonAge)
+	output = output.replace('WIND_SPEED',windSpeed)
+	output = output.replace('WIND_DIR',windDirection)
 else:
 	output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
 
