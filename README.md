@@ -6,3 +6,6 @@ sunrise/set times, moon phase info, and wind speed/direction.
 
 Weather Underground data requires an API key:
 http://www.wunderground.com/weather/api/
+
+![Weather station image](http://jkua.github.io/kindle-weather-display/kindleWeatherStation.jpg)
+
