@@ -53,7 +53,7 @@
 <text style="text-anchor:end;" font-size="90px" y="380" x="530">LOW_ONE</text>
 <text style="text-anchor:start;" font-size="50px" y="355" x="525">°F</text>
 
-<text style="text-anchor:middle;" font-size="30px" y="450" x="100">Tomorrow</text>
+<text style="text-anchor:middle;" font-size="30px" y="450" x="100">DAY_TWO</text>
 <text style="text-anchor:start;" font-size="20px" y="615" x="40">High:</text>
 <text style="text-anchor:end;" font-size="58px" y="665" x="115">HIGH_TWO</text>
 <text style="text-anchor:start;" font-size="37px" y="651" x="112">°F</text>
@@ -61,7 +61,7 @@
 <text style="text-anchor:end;" font-size="58px" y="745" x="115">LOW_TWO</text>
 <text style="text-anchor:start;" font-size="37px" y="731" x="112">°F</text>
 
-<text style="text-anchor:middle;" font-size="30px" y="450" x="300">Friday</text>
+<text style="text-anchor:middle;" font-size="30px" y="450" x="300">DAY_THREE</text>
 <text style="text-anchor:start;" font-size="20px" y="615" x="240">High:</text>
 <text style="text-anchor:end;" font-size="58px" y="665" x="315">HIGH_THREE</text>
 <text style="text-anchor:start;" font-size="37px" y="651" x="312">°F</text>
@@ -69,7 +69,7 @@
 <text style="text-anchor:end;" font-size="58px" y="745" x="315">LOW_THREE</text>
 <text style="text-anchor:start;" font-size="37px" y="731" x="312">°F</text>
 
-<text style="text-anchor:middle;" font-size="30px" y="450" x="500">Saturday</text>
+<text style="text-anchor:middle;" font-size="30px" y="450" x="500">DAY_FOUR</text>
 <text style="text-anchor:start;" font-size="20px" y="615" x="440">High:</text>
 <text style="text-anchor:end;" font-size="58px" y="665" x="515">HIGH_FOUR</text>
 <text style="text-anchor:start;" font-size="37px" y="651" x="512">°F</text>
