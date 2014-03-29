@@ -57,16 +57,39 @@ if useWunderground == True:
 	highs = []
 	lows = []
 	icons = []
+	pop = []
+	qpf_day =[]
+	qpf_night = []
+	snow_day = []
+	snow_night = []
 	for forecastDay in forecastDayXml:
 		tempsXml = forecastDay.getElementsByTagName('fahrenheit')
 		highs.append(tempsXml[0].firstChild.nodeValue)
 		lows.append(tempsXml[1].firstChild.nodeValue)
 		iconXml = forecastDay.getElementsByTagName('icon')
 		icons.append(iconDict[iconXml[0].firstChild.nodeValue])
+		popXml = forecastDay.getElementsByTagName('pop')
+		pop.append(int(popXml[0].firstChild.nodeValue))
+		rainQuantityXml = forecastDay.getElementsByTagName('in')
+		qpf_day.append(float(rainQuantityXml[0].firstChild.nodeValue))
+		qpf_night.append(float(rainQuantityXml[1].firstChild.nodeValue))
+		snow_day.append(float(rainQuantityXml[2].firstChild.nodeValue))
+		snow_night.append(float(rainQuantityXml[3].firstChild.nodeValue))
 	day = int(forecastDayXml[0].getElementsByTagName('day')[0].firstChild.nodeValue)
 	month = int(forecastDayXml[0].getElementsByTagName('month')[0].firstChild.nodeValue)
 	year = int(forecastDayXml[0].getElementsByTagName('year')[0].firstChild.nodeValue)
 	day_one = datetime.date(year, month, day)
+
+	txtForecastXml = dom.getElementsByTagName('txt_forecast')
+	txtForecastDayXml = txtForecastXml[0].getElementsByTagName('forecastday')
+	pop_day = []
+	pop_night = []
+	for i, forecastDay in enumerate(txtForecastDayXml):
+		popXml = forecastDay.getElementsByTagName('pop')
+		if i % 2 == 0:
+			pop_day.append(int(popXml[0].firstChild.nodeValue))
+		else:
+			pop_night.append(int(popXml[0].firstChild.nodeValue))
 
 	currentObservationXml = dom.getElementsByTagName('current_observation')
 	currentTemperatureXml = currentObservationXml[0].getElementsByTagName('temp_f')
@@ -134,6 +157,31 @@ if useWunderground == True:
 	output = output.replace('MOON_AGE',moonAge)
 	output = output.replace('WIND_SPEED',windSpeed)
 	output = output.replace('WIND_DIR',windDirection)
+
+	if pop[0] > 10:
+		percentPrecipitation = '<g font-family="DejaVu Sans">\n'
+		percentPrecipitation += '<text style="text-anchor:end;" font-size="20px" y="300" x="380">Day: ' + str(pop_day[0]) +'%</text>\n'
+		percentPrecipitation += '<text style="text-anchor:end;" font-size="20px" y="325" x="380">Night: ' + str(pop_night[0]) +'%</text>\n'
+		percentPrecipitation += '</g>\n</svg>' 
+		output = output.replace('</svg>',percentPrecipitation)
+
+	if pop[1] > 10:
+		percentPrecipitation = '<g font-family="DejaVu Sans">\n'
+		percentPrecipitation += '<text style="text-anchor:end;" font-size="15px" y="580" x="180">' + str(pop[1]) +'%</text>\n'
+		percentPrecipitation += '</g>\n</svg>' 
+		output = output.replace('</svg>',percentPrecipitation)
+
+	if pop[2] > 10:
+		percentPrecipitation = '<g font-family="DejaVu Sans">\n'
+		percentPrecipitation += '<text style="text-anchor:end;" font-size="15px" y="580" x="380">' + str(pop[2]) +'%</text>\n'
+		percentPrecipitation += '</g>\n</svg>' 
+		output = output.replace('</svg>',percentPrecipitation)
+
+	if pop[3] > 10:
+		percentPrecipitation = '<g font-family="DejaVu Sans">\n'
+		percentPrecipitation += '<text style="text-anchor:end;" font-size="15px" y="580" x="580">' + str(pop[3]) +'%</text>\n'
+		percentPrecipitation += '</g>\n</svg>' 
+		output = output.replace('</svg>',percentPrecipitation)
 else:
 	output = codecs.open('weather-script-preprocess.svg', 'r', encoding='utf-8').read()
 
